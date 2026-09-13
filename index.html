@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tyrol Almabtriebe 2026 | Interactive Cattle & Sheep Drives Map</title>
+  <meta name="description" content="Explore traditional 2026 cattle drives (Almabtriebe) and sheep descents across Tyrol, Austria. Interactive map, dates, distances from Innsbruck, and festival details.">
+
+  <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <style>
+    :root {
+      --primary-dark: #123019;
+      --primary-green: #235930;
+      --primary-emerald: #2e7d32;
+      --primary-light: #e8f5e9;
+      --accent-amber: #d97706;
+      --accent-gold: #f59e0b;
+      --accent-rust: #c2410c;
+      --accent-purple: #7c3aed;
+      --accent-blue: #0284c7;
+      --bg-cream: #fbf9f5;
+      --bg-surface: #ffffff;
+      --border-subtle: #e5e0d8;
+      --border-focus: #235930;
+      --text-main: #1c1e21;
+      --text-muted: #575e65;
+      --text-light: #7b848e;
+      --shadow-sm: 0 2px 8px rgba(28, 48, 25, 0.06);
+      --shadow-md: 0 8px 24px rgba(28, 48, 25, 0.1);
+      --shadow-lg: 0 16px 36px rgba(28, 48, 25, 0.14);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-cream);
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header Banner */
+    header {
+      background: linear-gradient(135deg, #112d18 0%, #1f4e2a 45%, #2a6839 100%);
+      color: #ffffff;
+      padding: 44px 24px 34px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .header-content {
+      max-width: 1300px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(8px);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #fed7aa;
+      border: 1px solid rgba(254, 215, 170, 0.25);
+    }
+
+    .github-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      color: white;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 7px 16px;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.2s ease;
+    }
+    .github-link-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+      transform: translateY(-1px);
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-subtitle {
+      font-size: clamp(0.95rem, 1.8vw, 1.12rem);
+      color: rgba(255, 255, 255, 0.88);
+      max-width: 820px;
+      line-height: 1.55;
+      margin-bottom: 24px;
+    }
+
+    /* Stats Ribbon */
+    .stats-ribbon {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .stat-pill {
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-md);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stat-pill .stat-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fef08a;
+      line-height: 1;
+    }
+
+    .stat-pill .stat-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: rgba(255, 255, 255, 0.75);
+      line-height: 1.2;
+    }
+
+    /* Main App Layout */
+    .main-wrapper {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 20px 48px;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* Controls & Filter Bar */
+    .filter-section {
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 260px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px 16px 12px 42px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #fafafa;
+    }
+
+    .search-box input:focus {
+      border-color: var(--primary-green);
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(35, 89, 48, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+      pointer-events: none;
+      font-size: 1.1rem;
+    }
+
+    .sort-box, .region-box {
+      min-width: 190px;
+    }
+
+    select {
+      width: 100%;
+      height: 100%;
+      min-height: 46px;
+      padding: 10px 14px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-main);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background-color: #fafafa;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:focus {
+      border-color: var(--primary-green);
+      background-color: #fff;
+    }
+
+    /* Category Pill Filters */
+    .filter-pills {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-label-prefix {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-right: 4px;
+    }
+
+    .filter-btn {
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 600;
+      padding: 7px 16px;
+      border-radius: var(--radius-full);
+      border: 1.5px solid var(--border-subtle);
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--primary-green);
+      color: var(--primary-green);
+      background: var(--primary-light);
+    }
+
+    .filter-btn.active {
+      background: var(--primary-green);
+      color: white;
+      border-color: var(--primary-green);
+      box-shadow: 0 2px 8px rgba(35, 89, 48, 0.25);
+    }
+
+    .filter-count {
+      font-size: 0.76rem;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      background: rgba(0, 0, 0, 0.08);
+    }
+    .filter-btn.active .filter-count {
+      background: rgba(255, 255, 255, 0.25);
+      color: white;
+    }
+
+    .results-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      padding-top: 6px;
+      border-top: 1px dashed var(--border-subtle);
+    }
+
+    .reset-btn {
+      background: none;
+      border: none;
+      color: var(--accent-amber);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: none;
+    }
+    .reset-btn:hover {
+      text-decoration: underline;
+    }
+
+    /* Content Layout: Map & Timeline Split */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.08fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 980px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Sticky Map Panel */
+    .map-pane {
+      position: sticky;
+      top: 20px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .map-header {
+      padding: 14px 20px;
+      background: #fdfdfd;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .map-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .map-hint {
+      font-size: 0.78rem;
+      color: var(--text-light);
+    }
+
+    #map {
+      height: 580px;
+      width: 100%;
+      z-index: 1;
+    }
+
+    .map-legend {
+      padding: 12px 20px;
+      background: #fafaf9;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* Timeline & Event Cards List */
+    .timeline-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .month-header {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin: 16px 0 4px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e2ebd8;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .month-header:first-of-type {
+      margin-top: 0;
+    }
+
+    .month-count-badge {
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: #e8f5e9;
+      color: var(--primary-green);
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+    }
+
+    /* Event Card */
+    .event-card {
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      border: 1.5px solid var(--border-subtle);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .event-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: #bbf7d0;
+    }
+
+    .event-card.active-card {
+      border-color: var(--primary-emerald);
+      box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2), var(--shadow-md);
+      background: #fcfffc;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .date-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.83rem;
+      font-weight: 700;
+      color: var(--primary-green);
+      background: #edf7ed;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      letter-spacing: 0.3px;
+    }
+
+    .badges-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .dist-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #7c2d12;
+      background: #ffedd5;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      border: 1px solid #fed7aa;
+    }
+
+    .category-badge {
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .cat-cattle { background: #e0f2fe; color: #0369a1; }
+    .cat-sheep { background: #fef3c7; color: #b45309; }
+    .cat-stallion { background: #f3e8ff; color: #6b21a8; }
+
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+      line-height: 1.25;
+    }
+
+    .card-loc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .card-desc {
+      font-size: 0.92rem;
+      color: #3e454d;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #f1ece5;
+    }
+
+    .focus-map-btn {
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--primary-green);
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0;
+      transition: color 0.15s;
+    }
+    .focus-map-btn:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    .source-link {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent-rust);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.15s;
+    }
+    .source-link:hover {
+      text-decoration: underline;
+      color: #9a3412;
+    }
+
+    /* Empty state */
+    .empty-state {
+      background: var(--bg-surface);
+      border: 2px dashed var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+    .empty-state h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+    .empty-state p {
+      font-size: 0.92rem;
+      margin-bottom: 16px;
+    }
+
+    /* Footer */
+    footer {
+      background: #112616;
+      color: rgba(255, 255, 255, 0.7);
+      padding: 36px 24px;
+      margin-top: auto;
+      font-size: 0.86rem;
+    }
+
+    .footer-inner {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .footer-text a {
+      color: #fed7aa;
+      text-decoration: none;
+    }
+    .footer-text a:hover {
+      text-decoration: underline;
+    }
+
+    /* Custom Leaflet Markers */
+    .cow-pin {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.18s ease;
+    }
+    .cow-pin:hover {
+      transform: scale(1.18);
+      z-index: 1000 !important;
+    }
+
+    .cow-pin-bubble {
+      width: 32px;
+      height: 32px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2.5px solid #ffffff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .cow-pin-bubble.selected {
+      box-shadow: 0 0 0 4px #22c55e, 0 4px 14px rgba(0, 0, 0, 0.35);
+      animation: pinPulse 1.4s infinite;
+    }
+
+    @keyframes pinPulse {
+      0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7), 0 4px 14px rgba(0,0,0,0.3); }
+      70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0), 0 4px 14px rgba(0,0,0,0.3); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0), 0 4px 14px rgba(0,0,0,0.3); }
+    }
+
+    .cow-pin-inner {
+      transform: rotate(45deg);
+      font-size: 11px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1;
+    }
+
+    /* Innsbruck Hub Pin */
+    .innsbruck-hub-pin {
+      width: 38px;
+      height: 38px;
+      background: #0f172a;
+      border: 3px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    /* Popup Styling */
+    .leaflet-popup-content-wrapper {
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      padding: 4px;
+    }
+    .leaflet-popup-content {
+      margin: 12px 14px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      line-height: 1.45;
+    }
+    .popup-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #9a3412;
+      background: #ffedd5;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-bottom: 6px;
+    }
+    .popup-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+    .popup-date {
+      color: var(--primary-green);
+      font-weight: 700;
+      font-size: 0.82rem;
+      margin-bottom: 6px;
+    }
+    .popup-loc {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .popup-desc {
+      font-size: 0.84rem;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .popup-link {
+      display: inline-block;
+      font-size: 0.8rem;
+      color: var(--accent-amber);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .popup-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Banner -->
+  <header>
+    <div class="header-content">
+      <div class="header-top">
+        <div class="brand-badge">
+          <span>🔔</span> Traditional Alpine Descents &bull; Tirol, Austria
+        </div>
+        <a class="github-link-btn" id="githubRepoLink" href="https://github.com" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+          </svg>
+          <span>View on GitHub</span>
+        </a>
+      </div>
+
+      <h1>Tyrol Almabtriebe & Cattle Drives 2026</h1>
+      <p class="header-subtitle">
+        Explore decorated cattle, sheep, and stallion drives bringing livestock home from the alpine meadows. Complete autumn dates, interactive geographic map, and straight-line distances from Innsbruck.
+      </p>
+
+      <div class="stats-ribbon">
+        <div class="stat-pill">
+          <span class="stat-num" id="statTotalEvents">36</span>
+          <span class="stat-label">Traditional<br>Events</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-num">Sep 13 &ndash; Oct 10</span>
+          <span class="stat-label">Season<br>Timespan</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-num" id="statTotalRegions">14+</span>
+          <span class="stat-label">Alpine<br>Regions</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-num">Innsbruck</span>
+          <span class="stat-label">Reference<br>Point (0 km)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="main-wrapper">
+    <!-- Filter Section -->
+    <section class="filter-section" aria-label="Filters and Search">
+      <div class="search-row">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search by town, event name, or valley (e.g. Zillertal, Pertisau, Tannheim)..." aria-label="Search events">
+        </div>
+
+        <div class="region-box">
+          <select id="regionSelect" aria-label="Filter by Alpine Region">
+            <option value="ALL">All Alpine Regions</option>
+          </select>
+        </div>
+
+        <div class="sort-box">
+          <select id="sortSelect" aria-label="Sort events">
+            <option value="date-asc">Date (Chronological)</option>
+            <option value="dist-asc">Closest to Innsbruck</option>
+            <option value="dist-desc">Furthest from Innsbruck</option>
+            <option value="name-asc">Alphabetical (A &ndash; Z)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-pills">
+        <span class="filter-label-prefix">Animal Type:</span>
+        <button class="filter-btn active" data-type="all" id="filterAll">
+          All <span class="filter-count" id="countAll">36</span>
+        </button>
+        <button class="filter-btn" data-type="cattle" id="filterCattle">
+          🐄 Cattle (Almabtrieb) <span class="filter-count" id="countCattle">31</span>
+        </button>
+        <button class="filter-btn" data-type="sheep" id="filterSheep">
+          🐑 Sheep (Schafschoad) <span class="filter-count" id="countSheep">4</span>
+        </button>
+        <button class="filter-btn" data-type="stallion" id="filterStallion">
+          🐎 Stallions (Hengst) <span class="filter-count" id="countStallion">1</span>
+        </button>
+      </div>
+
+      <div class="results-meta">
+        <span id="resultsCount">Showing all 36 events</span>
+        <button class="reset-btn" id="resetBtn">Reset All Filters</button>
+      </div>
+    </section>
+
+    <!-- Grid View: Map & Cards -->
+    <div class="content-grid">
+      <!-- Sticky Map Column -->
+      <div class="map-pane">
+        <div class="map-header">
+          <div class="map-title">
+            <span>🗺️</span> Interactive Tyrol Map
+          </div>
+          <div class="map-hint">Click pin to view details</div>
+        </div>
+        <div id="map"></div>
+        <div class="map-legend">
+          <span class="legend-item">
+            <span class="legend-dot" style="background:#0f172a;"></span> <b>Innsbruck</b> (Center)
+          </span>
+          <span class="legend-item">
+            <span class="legend-dot" style="background:#2e7d32;"></span> Sep 13–19
+          </span>
+          <span class="legend-item">
+            <span class="legend-dot" style="background:#d97706;"></span> Sep 20–25
+          </span>
+          <span class="legend-item">
+            <span class="legend-dot" style="background:#7c3aed;"></span> Sep 26
+          </span>
+          <span class="legend-item">
+            <span class="legend-dot" style="background:#dc2626;"></span> Oct 04–10
+          </span>
+        </div>
+      </div>
+
+      <!-- Timeline & Cards Column -->
+      <div class="timeline-pane" id="eventsList" aria-live="polite">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-text">
+        <strong>Tyrol Cattle Drives (Almabtriebe) 2026</strong> &bull;
+        Data based on published dates from <a href="https://www.allgaeuer-zeitung.de" target="_blank" rel="noopener">Allgäuer Zeitung</a>.
+        <br><span style="opacity: 0.8; font-size: 0.78rem;">Dates and celebrations are subject to local alpine weather conditions and pasture timing. Always check locally before traveling.</span>
+      </div>
+      <div style="font-size: 0.8rem; opacity: 0.85;">
+        Distances calculated straight-line from Innsbruck (Altstadt)
+      </div>
+    </div>
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <script>
+    // Raw Event Dataset
+    const RAW_EVENTS = [
+      {"name": "Kurzras/Vernagt (Sheep drive, Kurzras)", "date": "2026-09-13", "loc": "Kurzras, Schnalstal", "lat": 46.7333, "lon": 10.8, "desc": "Traditional sheep drive down from the alpine pastures in the Ötztal/Schnalstal region.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Nesselwängle Cattle Drive", "date": "2026-09-13", "loc": "Nesselwängle, Tannheimer Tal", "lat": 47.5333, "lon": 10.5333, "desc": "One of five cattle drives celebrated in the scenic Tannheim Valley this season.", "link": "https://www.allgaeuer-zeitung.de/allgaeu/almabtrieb-im-tannheimer-tal-2026-termine-infos-schattwald-tannheim-graen-jungholz-nesselwaengle-a-7-114314473"},
+      {"name": "Ehrwald Sheep Drive (Schafscheid)", "date": "2026-09-13", "loc": "Ehrwald, Reutte district", "lat": 47.4, "lon": 10.9333, "desc": "Sheep drive event in the Zugspitze region of the Reutte district.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Tarrenz Sheep Drive", "date": "2026-09-13", "loc": "Tarrenz, Imst district", "lat": 47.25, "lon": 10.7333, "desc": "Sheep drive marking the end of alpine grazing season near Imst.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Kramsach Cattle Drive (Hoamfahrerfestl)", "date": "2026-09-13", "loc": "Kramsach, Alpbachtal", "lat": 47.4333, "lon": 11.8667, "desc": "Festive 'Hoamfahrerfestl' celebration accompanies the cattle drive in the Alpbachtal lake district.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Prutz Almabtrieb", "date": "2026-09-14", "loc": "Prutz, Tiroler Oberland", "lat": 47.0167, "lon": 10.6667, "desc": "Cattle drive celebration in the Tiroler Oberland region.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Pertisau Cattle Drive (Hotel Das Rieser)", "date": "2026-09-16", "loc": "Pertisau, Achensee", "lat": 47.4167, "lon": 11.7167, "desc": "Cattle drive event hosted near Hotel Das Rieser on the shores of the Achensee.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Pertisau Cattle Drive (Gramai-Alm)", "date": "2026-09-18", "loc": "Pertisau, Achensee", "lat": 47.4167, "lon": 11.7167, "desc": "Scenic lakeside cattle drive from the Gramai-Alm above Lake Achensee.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Mutters Almabtrieb", "date": "2026-09-19", "loc": "Mutters, Innsbruck-Land", "lat": 47.2333, "lon": 11.3667, "desc": "Closest cattle drive to Innsbruck, right on the doorstep in Innsbruck-Land.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Fulpmes Almabtrieb", "date": "2026-09-19", "loc": "Fulpmes, Stubaital", "lat": 47.15, "lon": 11.3667, "desc": "Traditional alpine descent in the popular Stubai Valley.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Leutasch Almabtrieb", "date": "2026-09-19", "loc": "Leutasch, Seefeld Olympic Region", "lat": 47.3333, "lon": 11.1667, "desc": "Cattle drive in the Seefeld Olympic Region, known for scenic alpine plateaus.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Fiss Almabtrieb", "date": "2026-09-19", "loc": "Fiss, Serfaus-Fiss-Ladis", "lat": 47.05, "lon": 10.6167, "desc": "Cattle drive in the Serfaus-Fiss-Ladis holiday region.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Schattwald Cattle Drive", "date": "2026-09-19", "loc": "Schattwald, Tannheimer Tal", "lat": 47.55, "lon": 10.5167, "desc": "Iconic Tannheim Valley cattle drive with traditional dress and decorated cows.", "link": "https://www.allgaeuer-zeitung.de/allgaeu/almabtrieb-im-tannheimer-tal-2026-termine-infos-schattwald-tannheim-graen-jungholz-nesselwaengle-a-7-114314473"},
+      {"name": "Söll Almabtrieb", "date": "2026-09-19", "loc": "Söll, Wilder Kaiser", "lat": 47.5, "lon": 12.1833, "desc": "Alpine cattle drive beneath the dramatic Wilder Kaiser mountain range.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Wildschönau-Auffach Almabtrieb", "date": "2026-09-19", "loc": "Wildschönau-Auffach", "lat": 47.4167, "lon": 12.0333, "desc": "Cattle drive celebration in the picturesque Wildschönau valley.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Brixen im Thale / Kirchberg / Westendorf Cattle Drive", "date": "2026-09-19", "loc": "Kitzbühel Alps", "lat": 47.45, "lon": 12.25, "desc": "Combined cattle drive celebration across three villages in the Kitzbühel Alps.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Landl Thiersee Cattle Drive (1)", "date": "2026-09-19", "loc": "Landl, Thiersee, Kufstein region", "lat": 47.55, "lon": 12.0833, "desc": "First of two cattle drive dates in the Thiersee valley near Kufstein.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Reith im Alpbachtal Cattle Drive (1)", "date": "2026-09-19", "loc": "Reith im Alpbachtal", "lat": 47.4167, "lon": 11.9167, "desc": "First of two Alpbachtal cattle drive dates this season.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Fügen Cattle Drive (Dorfzentrum)", "date": "2026-09-19", "loc": "Fügen, Zillertal", "lat": 47.3333, "lon": 11.85, "desc": "Village-center cattle drive celebration in Fügen, Zillertal.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Stumm Cattle Drive (Schuster Bauer)", "date": "2026-09-19", "loc": "Stumm, Zillertal", "lat": 47.3, "lon": 11.8667, "desc": "Farm-hosted cattle drive event at the Schuster Bauer farm in Stumm.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Stummerberg Cattle Drive", "date": "2026-09-20", "loc": "Stummerberg, Zillertal", "lat": 47.2833, "lon": 11.8833, "desc": "Cattle drive at the Gasthof Almluft in Stummerberg.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Ischgl Almabtrieb", "date": "2026-09-20", "loc": "Ischgl, Paznaun", "lat": 47.0167, "lon": 10.2833, "desc": "Cattle drive in the famous Paznaun ski and hiking region.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Tannheim Cattle Drive", "date": "2026-09-21", "loc": "Tannheim, Tannheimer Tal", "lat": 47.5, "lon": 10.5167, "desc": "Final and largest of the five Tannheim Valley cattle drive celebrations.", "link": "https://www.allgaeuer-zeitung.de/allgaeu/almabtrieb-im-tannheimer-tal-2026-termine-infos-schattwald-tannheim-graen-jungholz-nesselwaengle-a-7-114314473"},
+      {"name": "Pfunds Schafschoad", "date": "2026-09-25", "loc": "Pfunds, Tiroler Oberland", "lat": 46.9833, "lon": 10.5667, "desc": "Two-day sheep drive celebration ('Schafschoad') in the Tiroler Oberland.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Hintertuxer Oktoberfest & Almabtrieb", "date": "2026-09-25", "loc": "Tux, Zillertal", "lat": 47.1333, "lon": 11.6833, "desc": "Two-day festival combining Oktoberfest celebrations with a traditional cattle drive.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Neustift (Milders) Almabtrieb", "date": "2026-09-26", "loc": "Neustift/Milders, Stubaital", "lat": 47.1167, "lon": 11.3, "desc": "Season-closing cattle drive in Milders, Stubai Valley.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Gerlos Almabtrieb", "date": "2026-09-26", "loc": "Gerlos, Zillertal", "lat": 47.25, "lon": 11.9167, "desc": "Cattle drive celebration in the high alpine village of Gerlos.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Zell am Ziller Almabtrieb", "date": "2026-09-26", "loc": "Zell am Ziller, Zillertal", "lat": 47.2333, "lon": 11.8833, "desc": "Popular cattle drive in the heart of the Zillertal valley.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Fügen Cattle Drive (Hof Oberhuben)", "date": "2026-09-26", "loc": "Fügen, Zillertal", "lat": 47.34, "lon": 11.855, "desc": "Farm-based cattle drive celebration at Hof Oberhuben in Fügen.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Wiesing Almabtrieb", "date": "2026-09-26", "loc": "Wiesing, Achensee", "lat": 47.4333, "lon": 11.75, "desc": "Cattle drive near the northern shore of Lake Achensee.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Reith im Alpbachtal Cattle Drive (2)", "date": "2026-09-26", "loc": "Reith im Alpbachtal", "lat": 47.42, "lon": 11.92, "desc": "Second Alpbachtal cattle drive date of the season.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Landl Thiersee Cattle Drive (2)", "date": "2026-09-26", "loc": "Landl, Thiersee, Kufstein region", "lat": 47.555, "lon": 12.088, "desc": "Second Thiersee valley cattle drive date near Kufstein.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Hohe Salve Cattle Drive (Itter/Hopfgarten/Kelchsau)", "date": "2026-09-26", "loc": "Kitzbühel Alps", "lat": 47.46, "lon": 12.16, "desc": "Joint cattle drive across three villages beneath the Hohe Salve peak.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Kirchberg Cattle Drive (Hotel Elisabeth)", "date": "2026-09-26", "loc": "Kirchberg in Tirol, Kitzbühel Alps", "lat": 47.45, "lon": 12.32, "desc": "Cattle drive hosted at the Hotel Elisabeth in Kirchberg.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Fügen Cattle Drive (Gasteighof)", "date": "2026-10-04", "loc": "Fügen, Zillertal", "lat": 47.33, "lon": 11.848, "desc": "Late-season cattle drive at the Gasteighof farm, closing out the Fügen dates.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"},
+      {"name": "Hengstalmabtrieb Ebbs", "date": "2026-10-10", "loc": "Ebbs, Kufstein region", "lat": 47.5833, "lon": 12.1833, "desc": "Stallion herd drive ('Hengstalmabtrieb'), the latest event of the season near Kufstein.", "link": "https://www.allgaeuer-zeitung.de/oesterreich/almabtrieb-tirol-2026-alle-termine-ueberblick-bezirk-reutte-imst-lechtal-achensee-zillertal-tannheimer-tal-a-12-114847692"}
+    ];
+
+    // Reference Point: Innsbruck Altstadt
+    const INNSBRUCK = { name: "Innsbruck (Altstadt)", lat: 47.2692, lon: 11.4041 };
+
+    // Haversine Distance Calculation (km)
+    function calcDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return Math.round(R * c);
+    }
+
+    // Determine event category
+    function getCategory(ev) {
+      const text = (ev.name + " " + ev.desc).toLowerCase();
+      if (text.includes("sheep") || text.includes("schaf")) return "sheep";
+      if (text.includes("hengst") || text.includes("stallion")) return "stallion";
+      return "cattle";
+    }
+
+    // Determine region for clean grouping & filtering
+    function getRegion(ev) {
+      const loc = ev.loc;
+      if (loc.includes("Zillertal")) return "Zillertal";
+      if (loc.includes("Tannheimer Tal")) return "Tannheimer Tal";
+      if (loc.includes("Achensee")) return "Achensee";
+      if (loc.includes("Kitzbühel")) return "Kitzbühel Alps";
+      if (loc.includes("Kufstein") || loc.includes("Thiersee") || loc.includes("Ebbs")) return "Kufstein Region";
+      if (loc.includes("Alpbachtal")) return "Alpbachtal";
+      if (loc.includes("Stubaital")) return "Stubaital";
+      if (loc.includes("Innsbruck-Land")) return "Innsbruck-Land";
+      if (loc.includes("Reutte")) return "Reutte / Zugspitze";
+      if (loc.includes("Imst")) return "Imst District";
+      if (loc.includes("Tiroler Oberland")) return "Tiroler Oberland";
+      if (loc.includes("Serfaus") || loc.includes("Fiss")) return "Serfaus-Fiss-Ladis";
+      if (loc.includes("Paznaun") || loc.includes("Ischgl")) return "Paznaun (Ischgl)";
+      if (loc.includes("Seefeld") || loc.includes("Leutasch")) return "Seefeld Region";
+      if (loc.includes("Wildschönau")) return "Wildschönau";
+      if (loc.includes("Wilder Kaiser")) return "Wilder Kaiser";
+      if (loc.includes("Schnalstal") || loc.includes("Ötztal")) return "Ötztal / Schnalstal";
+      return "Tyrol";
+    }
+
+    // Color theme by date range
+    function getPinColor(dateStr) {
+      const day = parseInt(dateStr.slice(8, 10), 10);
+      const month = parseInt(dateStr.slice(5, 7), 10);
+      if (month === 10) return '#dc2626'; // October: Red
+      if (day >= 26) return '#7c3aed';    // Late Sep: Purple
+      if (day >= 20) return '#d97706';    // Mid Sep: Amber
+      return '#2e7d32';                   // Early Sep: Forest Green
+    }
+
+    // Process & Enrich Events
+    const events = RAW_EVENTS.map((ev, index) => {
+      const dist = calcDistance(INNSBRUCK.lat, INNSBRUCK.lon, ev.lat, ev.lon);
+      const cat = getCategory(ev);
+      const region = getRegion(ev);
+      return {
+        ...ev,
+        id: index,
+        distFromInnsbruck: dist,
+        category: cat,
+        region: region,
+        dateObj: new Date(ev.date + "T00:00:00")
+      };
+    });
+
+    // Unique Regions for dropdown
+    const regions = [...new Set(events.map(e => e.region))].sort();
+    const regionSelect = document.getElementById('regionSelect');
+    regions.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r;
+      opt.textContent = r;
+      regionSelect.appendChild(opt);
+    });
+    document.getElementById('statTotalRegions').textContent = regions.length;
+
+    // Counts for Category Buttons
+    const counts = {
+      all: events.length,
+      cattle: events.filter(e => e.category === 'cattle').length,
+      sheep: events.filter(e => e.category === 'sheep').length,
+      stallion: events.filter(e => e.category === 'stallion').length
+    };
+    document.getElementById('countAll').textContent = counts.all;
+    document.getElementById('countCattle').textContent = counts.cattle;
+    document.getElementById('countSheep').textContent = counts.sheep;
+    document.getElementById('countStallion').textContent = counts.stallion;
+
+    // State
+    let activeFilter = 'all';
+    let searchQuery = '';
+    let selectedRegion = 'ALL';
+    let currentSort = 'date-asc';
+    let selectedEventId = null;
+
+    // Initialize Leaflet Map
+    const map = L.map('map', {
+      scrollWheelZoom: true
+    }).setView([47.33, 11.55], 9);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Add Innsbruck Reference Marker
+    const innsbruckIcon = L.divIcon({
+      html: `<div class="innsbruck-hub-pin" title="Innsbruck (Reference Center)">🏔️</div>`,
+      className: '',
+      iconSize: [38, 38],
+      iconAnchor: [19, 19],
+      popupAnchor: [0, -18]
+    });
+
+    L.marker([INNSBRUCK.lat, INNSBRUCK.lon], { icon: innsbruckIcon, zIndexOffset: 500 })
+      .addTo(map)
+      .bindPopup(`
+        <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:2px;">📍 Innsbruck (Capital of Tyrol)</div>
+        <div style="font-size:0.84rem;color:#666;">Central reference point for straight-line distances to all alpine drives.</div>
+      `);
+
+    // Map Markers dictionary
+    const markers = {};
+
+    function createMarkerIcon(ev, isSelected = false) {
+      const color = getPinColor(ev.date);
+      const dayNum = ev.dateObj.getDate();
+      return L.divIcon({
+        html: `
+          <div class="cow-pin" data-id="${ev.id}">
+            <div class="cow-pin-bubble ${isSelected ? 'selected' : ''}" style="background-color: ${color};">
+              <span class="cow-pin-inner">${dayNum}</span>
+            </div>
+          </div>
+        `,
+        className: '',
+        iconSize: [32, 32],
+        iconAnchor: [16, 30],
+        popupAnchor: [0, -28]
+      });
+    }
+
+    // Populate all markers on the map
+    events.forEach(ev => {
+      const marker = L.marker([ev.lat, ev.lon], {
+        icon: createMarkerIcon(ev)
+      }).addTo(map);
+
+      const dateStr = ev.dateObj.toLocaleDateString('en-GB', {
+        weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+      });
+
+      const catBadge = ev.category === 'cattle' ? '🐄 Cattle Drive' :
+                       ev.category === 'sheep' ? '🐑 Sheep Drive' : '🐎 Stallion Drive';
+
+      const popupContent = `
+        <div class="popup-badge">📍 ${ev.distFromInnsbruck} km from Innsbruck</div>
+        <div class="popup-title">${ev.name}</div>
+        <div class="popup-date">📅 ${dateStr} &bull; ${catBadge}</div>
+        <div class="popup-loc">📍 ${ev.loc}</div>
+        <div class="popup-desc">${ev.desc}</div>
+        <a class="popup-link" href="${ev.link}" target="_blank" rel="noopener">Official info & details &rarr;</a>
+      `;
+
+      marker.bindPopup(popupContent);
+
+      marker.on('click', () => {
+        selectEvent(ev.id, false);
+      });
+
+      markers[ev.id] = marker;
+    });
+
+    // Event Selection Synchronization
+    function selectEvent(id, panMap = true) {
+      selectedEventId = id;
+      const ev = events.find(e => e.id === id);
+      if (!ev) return;
+
+      // Update card highlighting
+      document.querySelectorAll('.event-card').forEach(card => {
+        card.classList.toggle('active-card', parseInt(card.dataset.id, 10) === id);
+      });
+
+      // Scroll card into view if needed
+      const cardEl = document.querySelector(`.event-card[data-id="${id}"]`);
+      if (cardEl && !panMap) {
+        cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      // Update marker icons (highlight selected)
+      events.forEach(e => {
+        if (markers[e.id]) {
+          markers[e.id].setIcon(createMarkerIcon(e, e.id === id));
+        }
+      });
+
+      // Pan & open popup
+      if (markers[id]) {
+        if (panMap) {
+          map.flyTo([ev.lat, ev.lon], 11, { duration: 0.8 });
+        }
+        markers[id].openPopup();
+      }
+    }
+
+    // Render Event Cards
+    const eventsList = document.getElementById('eventsList');
+    const resultsCount = document.getElementById('resultsCount');
+    const resetBtn = document.getElementById('resetBtn');
+
+    function renderCards() {
+      // 1. Filter
+      let filtered = events.filter(ev => {
+        // Category filter
+        if (activeFilter !== 'all' && ev.category !== activeFilter) return false;
+
+        // Region filter
+        if (selectedRegion !== 'ALL' && ev.region !== selectedRegion) return false;
+
+        // Search query
+        if (searchQuery.trim() !== '') {
+          const q = searchQuery.toLowerCase();
+          const match = ev.name.toLowerCase().includes(q) ||
+                        ev.loc.toLowerCase().includes(q) ||
+                        ev.desc.toLowerCase().includes(q) ||
+                        ev.region.toLowerCase().includes(q);
+          if (!match) return false;
+        }
+        return true;
+      });
+
+      // 2. Sort
+      filtered.sort((a, b) => {
+        if (currentSort === 'date-asc') return a.dateObj - b.dateObj;
+        if (currentSort === 'dist-asc') return a.distFromInnsbruck - b.distFromInnsbruck;
+        if (currentSort === 'dist-desc') return b.distFromInnsbruck - a.distFromInnsbruck;
+        if (currentSort === 'name-asc') return a.name.localeCompare(b.name);
+        return 0;
+      });
+
+      // 3. Update Results meta & Map Marker visibility
+      resultsCount.textContent = `Showing ${filtered.length} of ${events.length} events`;
+      const isFiltered = activeFilter !== 'all' || selectedRegion !== 'ALL' || searchQuery.trim() !== '';
+      resetBtn.style.display = isFiltered ? 'inline-block' : 'none';
+
+      // Update map markers visibility & bounding box
+      const bounds = [];
+      events.forEach(e => {
+        const marker = markers[e.id];
+        const isVisible = filtered.some(f => f.id === e.id);
+        if (isVisible) {
+          if (!map.hasLayer(marker)) map.addLayer(marker);
+          bounds.push([e.lat, e.lon]);
+        } else {
+          if (map.hasLayer(marker)) map.removeLayer(marker);
+        }
+      });
+
+      // Adjust map bounds to visible markers if filtered
+      if (bounds.length > 0 && isFiltered) {
+        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 11 });
+      } else if (!isFiltered) {
+        map.setView([47.33, 11.55], 9);
+      }
+
+      // 4. Render HTML
+      if (filtered.length === 0) {
+        eventsList.innerHTML = `
+          <div class="empty-state">
+            <h3>No cattle drives found</h3>
+            <p>No events match your current filter or search criteria.</p>
+            <button class="filter-btn active" onclick="resetFilters()">Reset All Filters</button>
+          </div>
+        `;
+        return;
+      }
+
+      // Group cards by month if sorting by date
+      let html = '';
+      let currentMonth = null;
+
+      filtered.forEach(ev => {
+        const monthNum = ev.dateObj.getMonth() + 1;
+        if (currentSort === 'date-asc' && monthNum !== currentMonth) {
+          currentMonth = monthNum;
+          const monthName = monthNum === 9 ? 'September 2026' : 'October 2026';
+          const monthCount = filtered.filter(e => e.dateObj.getMonth() + 1 === monthNum).length;
+          html += `
+            <div class="month-header">
+              <span>${monthName}</span>
+              <span class="month-count-badge">${monthCount} Event${monthCount > 1 ? 's' : ''}</span>
+            </div>
+          `;
+        }
+
+        const dateFormatted = ev.dateObj.toLocaleDateString('en-GB', {
+          weekday: 'short', day: 'numeric', month: 'short'
+        });
+
+        const catClass = ev.category === 'cattle' ? 'cat-cattle' :
+                         ev.category === 'sheep' ? 'cat-sheep' : 'cat-stallion';
+        const catLabel = ev.category === 'cattle' ? '🐄 Almabtrieb' :
+                         ev.category === 'sheep' ? '🐑 Sheep Drive' : '🐎 Stallion Drive';
+
+        const isSelected = selectedEventId === ev.id;
+
+        html += `
+          <article class="event-card ${isSelected ? 'active-card' : ''}" data-id="${ev.id}" onclick="selectEvent(${ev.id}, true)">
+            <div class="card-top">
+              <span class="date-badge">📅 ${dateFormatted}</span>
+              <div class="badges-group">
+                <span class="category-badge ${catClass}">${catLabel}</span>
+                <span class="dist-badge">📍 ${ev.distFromInnsbruck} km from Innsbruck</span>
+              </div>
+            </div>
+            <h3 class="card-title">${ev.name}</h3>
+            <div class="card-loc">📍 ${ev.loc} &bull; <strong>${ev.region}</strong></div>
+            <p class="card-desc">${ev.desc}</p>
+            <div class="card-actions">
+              <button class="focus-map-btn" type="button" onclick="event.stopPropagation(); selectEvent(${ev.id}, true);">
+                <span>🎯 View on Map</span>
+              </button>
+              <a class="source-link" href="${ev.link}" target="_blank" rel="noopener" onclick="event.stopPropagation();">
+                More info &rarr;
+              </a>
+            </div>
+          </article>
+        `;
+      });
+
+      eventsList.innerHTML = html;
+    }
+
+    // Reset Function
+    window.resetFilters = function() {
+      activeFilter = 'all';
+      searchQuery = '';
+      selectedRegion = 'ALL';
+      currentSort = 'date-asc';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('regionSelect').value = 'ALL';
+      document.getElementById('sortSelect').value = 'date-asc';
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.type === 'all');
+      });
+      renderCards();
+    };
+
+    // Event Listeners
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.dataset.type;
+        renderCards();
+      });
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderCards();
+    });
+
+    document.getElementById('regionSelect').addEventListener('change', (e) => {
+      selectedRegion = e.target.value;
+      renderCards();
+    });
+
+    document.getElementById('sortSelect').addEventListener('change', (e) => {
+      currentSort = e.target.value;
+      renderCards();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', resetFilters);
+
+    // Initial Render
+    renderCards();
+  </script>
+</body>
+</html>
