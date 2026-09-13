@@ -1,6 +1,6 @@
-# 🐄 Tyrol Almabtriebe & Cattle Drives 2026 — Fancy Cow Map
+# 🐄 Fancy cow map: Well-dressed farm animals of Tyrol spotting guide
 
-An interactive web application showcasing traditional cattle, sheep, and stallion drives (*Almabtriebe*) across Tyrol, Austria for the 2026 autumn season.
+An interactive spotting guide and web application showcasing traditional cattle, sheep, and stallion drives (*Almabtriebe*) across Tyrol, Austria for the 2026 autumn season.
 
 ---
 
