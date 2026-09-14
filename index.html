@@ -59,23 +59,20 @@
 
     /* Header Banner */
     header {
-      background: linear-gradient(135deg, #112d18 0%, #1f4e2a 45%, #2a6839 100%);
+      background: linear-gradient(135deg, rgba(10, 26, 14, 0.88) 0%, rgba(18, 48, 26, 0.78) 50%, rgba(10, 24, 14, 0.88) 100%),
+                  url('assets/hero_banner.jpg') center 36% / cover no-repeat;
       color: #ffffff;
-      padding: 44px 24px 34px;
+      padding: 44px 24px 38px;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 6px 28px rgba(0, 0, 0, 0.25);
     }
 
     header::before {
       content: '';
       position: absolute;
-      top: -40px;
-      right: -40px;
-      width: 240px;
-      height: 240px;
-      background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
-      border-radius: 50%;
+      inset: 0;
+      background: radial-gradient(circle at 85% 20%, rgba(245, 158, 11, 0.18) 0%, transparent 60%);
       pointer-events: none;
     }
 
@@ -84,6 +81,93 @@
       margin: 0 auto;
       position: relative;
       z-index: 1;
+    }
+
+    .header-layout {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .header-text-col {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .spotlight-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    @media (max-width: 920px) {
+      .spotlight-col {
+        align-items: flex-start;
+        width: 100%;
+        margin-top: 8px;
+      }
+    }
+
+    .spotlight-label {
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #fed7aa;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .spotlight-cards {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .spotlight-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(15, 30, 20, 0.68);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: var(--radius-md);
+      padding: 6px 14px 6px 6px;
+      transition: all 0.25s ease;
+      cursor: default;
+    }
+
+    .spotlight-card:hover {
+      background: rgba(15, 30, 20, 0.88);
+      border-color: rgba(254, 215, 170, 0.65);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .spotlight-thumb {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      border: 1.5px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .spotlight-name {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      line-height: 1.2;
+      color: #ffffff;
+    }
+
+    .spotlight-desc {
+      font-size: 0.74rem;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.2;
     }
 
     .header-top {
@@ -783,7 +867,7 @@
         <div class="brand-badge">
           <span>🔔</span> Traditional Alpine Descents &bull; Tirol, Austria
         </div>
-        <a class="github-link-btn" id="githubRepoLink" href="https://github.com" target="_blank" rel="noopener">
+        <a class="github-link-btn" id="githubRepoLink" href="https://github.com/speio/Fancy_Cow_Map" target="_blank" rel="noopener">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
           </svg>
@@ -791,27 +875,51 @@
         </a>
       </div>
 
-      <h1>Fancy cow map</h1>
-      <p class="header-subtitle">
-        Well-dressed farm animals of Tyrol spotting guide
-      </p>
+      <div class="header-layout">
+        <div class="header-text-col">
+          <h1>Fancy cow map</h1>
+          <p class="header-subtitle">
+            Well-dressed farm animals of Tyrol spotting guide
+          </p>
 
-      <div class="stats-ribbon">
-        <div class="stat-pill">
-          <span class="stat-num" id="statTotalEvents">36</span>
-          <span class="stat-label">Traditional<br>Events</span>
+          <div class="stats-ribbon">
+            <div class="stat-pill">
+              <span class="stat-num" id="statTotalEvents">36</span>
+              <span class="stat-label">Traditional<br>Events</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-num">Sep 13 &ndash; Oct 10</span>
+              <span class="stat-label">Season<br>Timespan</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-num" id="statTotalRegions">14+</span>
+              <span class="stat-label">Alpine<br>Regions</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-num">Innsbruck</span>
+              <span class="stat-label">Reference<br>Point (0 km)</span>
+            </div>
+          </div>
         </div>
-        <div class="stat-pill">
-          <span class="stat-num">Sep 13 &ndash; Oct 10</span>
-          <span class="stat-label">Season<br>Timespan</span>
-        </div>
-        <div class="stat-pill">
-          <span class="stat-num" id="statTotalRegions">14+</span>
-          <span class="stat-label">Alpine<br>Regions</span>
-        </div>
-        <div class="stat-pill">
-          <span class="stat-num">Innsbruck</span>
-          <span class="stat-label">Reference<br>Point (0 km)</span>
+
+        <div class="spotlight-col">
+          <div class="spotlight-label">✨ Well-Dressed Spotlights</div>
+          <div class="spotlight-cards">
+            <div class="spotlight-card" title="Traditional Dachschmuck floral crown">
+              <img src="assets/cow_portrait.jpg" alt="Decorated Austrian Cow" class="spotlight-thumb">
+              <div>
+                <div class="spotlight-name">Floral Crowns</div>
+                <div class="spotlight-desc">Dachschmuck & Bells</div>
+              </div>
+            </div>
+            <div class="spotlight-card" title="Tyrolean Schafschoad sheep descent">
+              <img src="assets/sheep_drive.jpg" alt="Alpine Sheep Drive" class="spotlight-thumb">
+              <div>
+                <div class="spotlight-name">Mountain Sheep</div>
+                <div class="spotlight-desc">Schafschoad Trails</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
